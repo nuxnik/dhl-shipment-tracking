@@ -50,7 +50,19 @@ class ShipmentTracking
     {
         $data = $this->call(static::OPERATION_GET_PIECE, $pieceNumber, $language);
         $array = $this->getArray($data);
-
+        $pieceNumbers = explode(';',$pieceNumber);
+        if (count($pieceNumbers) > 0 && isset($array['data'][0])) {
+            $errorStatus = 'error';
+            $batchArray = ['pieces' => [], 'error-status' => 'error'];
+            foreach ($array['data'] as $key => $piece) {
+                $batchArray['pieces'][$piece['@attributes']['piece-code']] = $piece['@attributes'];
+                if($piece['@attributes']['error-status'] == 0){
+                    $errorStatus = 0;
+                }
+            }
+            $batchArray['error-status'] = $errorStatus;
+            return $batchArray;
+        }
         return $array['data']['@attributes'];
     }
 
